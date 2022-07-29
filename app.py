@@ -1,3 +1,5 @@
+# Main streamlit application for the tiktok analytics dashboard
+
 # Import base streamlit dependency
 import streamlit as st
 # Import pandas to load analytics data
@@ -20,31 +22,32 @@ st.sidebar.markdown("Adaptation and improvement of Nicholas Renotte's implementa
 st.sidebar.markdown("Watch on youtube and support Nicholas Renotte: https://www.youtube.com/watch?v=E6B3uWF-V7w")
 # Input
 hashtag = st.text_input('Search for a hashtag here', value='')
+number_vids = st.slider('Number of videos', 1, 1000, 100)
 
 # Button
 if st.button('Get Data'): # Trigger something
     # Run get data function in command line to write csv
-    call(['python', 'tiktok.py', hashtag, '50'])
+    call(['python', 'tiktok.py', hashtag, str(number_vids)])
 
     # Load in existing data to test it out
     df = pd.read_csv('tiktokdata.csv')
 
     # Plotly viz here
-    fig = px.histogram(df, x='author_nickname', hover_data=['desc'], y='stats_diggCount', height=300)
+    fig = px.histogram(df, x='author_nickname', hover_data=['desc'], y='stats_diggCount', height=500, title=f'Number of likes for hashtag #{hashtag}', labels= {'author_nickname': 'Author', 'stats_diggCount': 'Likes'})
     st.plotly_chart(fig, use_container_width=True)
 
     # Split columns
     left_col, right_col = st.columns(2)
 
     # First Chart - video stats
-    scatter1 = px.scatter(df, x='stats_shareCount', y='stats_commentCount', hover_data=['desc'], size='stats_playCount', color='stats_playCount')
+    scatter1 = px.scatter(df, x='stats_shareCount', y='stats_commentCount', hover_data=['desc'], size='stats_playCount', color='stats_playCount', title='Comments and Shares information', labels= {'stats_shareCount': '# Shares', 'stats_commentCount': '# Comments'})
     left_col.plotly_chart(scatter1, use_container_width=True)
 
     # Second Chart - author stats
-    scatter2 = px.scatter(df, x='authorStats_videoCount', y='authorStats_heartCount', hover_data=['author_nickname'], size='authorStats_followerCount', color='authorStats_followerCount')
+    scatter2 = px.scatter(df, x='authorStats_videoCount', y='authorStats_heartCount', hover_data=['author_nickname'], size='authorStats_followerCount', color='authorStats_followerCount' ,title='Authors information', labels= {'authorStats_videoCount': '# Videos', 'authorStats_heartCount': '# Hearts', 'authorStats_followerCount': '# Followers', 'author_nickname': 'Author'})
     right_col.plotly_chart(scatter2, use_container_width=True)
 
 
-
+    st.markdown("### Tabular raw tiktok data")
     # Show tabular dataframe on streamlit
     df
